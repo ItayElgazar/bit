@@ -17,5 +17,5 @@ export default function filter(obj: Record<string, any>, cb: (val: any, key: any
     if (cb(val, key)) newObj[key] = val;
   });
 
-  return obj;
+  return newObj;
 }
