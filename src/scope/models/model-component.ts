@@ -1,5 +1,5 @@
 import { clone, equals, forEachObjIndexed } from 'ramda';
-import { isEmpty, pickBy } from 'lodash';
+import { forEach, isEmpty, pickBy } from 'lodash';
 import { Mutex } from 'async-mutex';
 import * as semver from 'semver';
 import { versionParser, isHash, isTag } from '@teambit/component-version';
@@ -22,7 +22,7 @@ import GeneralError from '../../error/general-error';
 import ShowDoctorError from '../../error/show-doctor-error';
 import ValidationError from '../../error/validation-error';
 import logger from '../../logger/logger';
-import { empty, forEach, getStringifyArgs, mapObject, sha1 } from '../../utils';
+import { getStringifyArgs, mapObject, sha1 } from '../../utils';
 import findDuplications from '../../utils/array/find-duplications';
 import ComponentObjects from '../component-objects';
 import { DivergeData } from '../component-ops/diverge-data';
@@ -350,7 +350,7 @@ export default class Component extends BitObject {
   }
 
   isEmpty() {
-    return empty(this.versions) && !this.hasHead();
+    return isEmpty(this.versions) && !this.hasHead();
   }
 
   latest(): string {
@@ -387,12 +387,12 @@ export default class Component extends BitObject {
   }
 
   latestVersion(): string {
-    if (empty(this.versions)) return VERSION_ZERO;
+    if (isEmpty(this.versions)) return VERSION_ZERO;
     return getLatestVersion(this.listVersions());
   }
 
   latestVersionIfExist(): string | undefined {
-    if (empty(this.versions)) return undefined;
+    if (isEmpty(this.versions)) return undefined;
     return getLatestVersion(this.listVersions());
   }
 
@@ -427,7 +427,7 @@ export default class Component extends BitObject {
    * @memberof Component
    */
   latestExisting(repository: Repository): string {
-    if (empty(this.versions)) return VERSION_ZERO;
+    if (isEmpty(this.versions)) return VERSION_ZERO;
     const versions = this.listVersions('ASC');
     let version = null;
     let versionStr = null;

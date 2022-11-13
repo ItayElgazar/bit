@@ -1,4 +1,5 @@
 import { compact } from 'lodash';
+import pFilter from 'p-filter';
 import R from 'ramda';
 import NoIdMatchWildcard from '../../api/consumer/lib/exceptions/no-id-match-wildcard';
 import { BitId, BitIds } from '../../bit-id';
@@ -9,7 +10,6 @@ import { Lane } from '../../scope/models';
 import ModelComponent from '../../scope/models/model-component';
 import Scope from '../../scope/scope';
 import { fetchRemoteVersions } from '../../scope/scope-remotes';
-import pFilter from 'p-filter';
 import isBitIdMatchByWildcards from '../../utils/bit/is-bit-id-match-by-wildcards';
 import BitMap from '../bit-map/bit-map';
 import ComponentMap from '../bit-map/component-map';
