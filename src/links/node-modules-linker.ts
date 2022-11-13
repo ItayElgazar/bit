@@ -15,7 +15,6 @@ import DataToPersist from '../consumer/component/sources/data-to-persist';
 import RemovePath from '../consumer/component/sources/remove-path';
 import Consumer from '../consumer/consumer';
 import logger from '../logger/logger';
-import { first } from '../utils';
 import getNodeModulesPathOfComponent from '../utils/bit/component-node-modules-path';
 import { PathOsBasedRelative } from '../utils/path';
 import LinkFile from './link-file';
@@ -183,7 +182,7 @@ export default class NodeModuleLinker {
     const customResolvedData = component.dependencies.getCustomResolvedData();
     if (!R.isEmpty(customResolvedData)) {
       // filter out packages that are actually symlinks to dependencies
-      Object.keys(customResolvedData).forEach((importSource) => dirsToFilter.push(first(importSource.split('/'))));
+      Object.keys(customResolvedData).forEach((importSource) => dirsToFilter.push(importSource.split('/')[0]));
     }
     const dirs = dirsToFilter.length ? unfilteredDirs.filter((dir) => !dirsToFilter.includes(dir)) : unfilteredDirs;
     if (!dirs.length) return [];
