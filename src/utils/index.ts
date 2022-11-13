@@ -26,7 +26,6 @@ import isNumeric from './number/is-numeric';
 import cleanObject from './object-clean';
 import objectToStringifiedTupleArray from './object-to-stringified-tuple-array';
 import empty from './object/empty';
-import filter from './object/filter';
 import forEach from './object/foreach';
 import hasOwnProperty from './object/has-own-property';
 import sortObject from './object/sort';
@@ -61,7 +60,6 @@ export {
   objectToStringifiedTupleArray,
   resolveGroupId,
   mapToObject,
-  filter as filterObject,
   sortObject,
   isString,
   removeChalkCharacters,
@@ -74,7 +72,6 @@ export {
   fromBase64,
   glob,
   empty,
-  filter,
   cleanChar,
   checksum,
   checksumFile,
