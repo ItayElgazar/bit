@@ -1,3 +1,4 @@
+import path from 'path';
 import { CommunityMain, CommunityAspect } from '@teambit/community';
 import { CompilerMain, CompilerAspect, CompilationInitiator } from '@teambit/compiler';
 import ManyComponentsWriter from '@teambit/legacy/dist/consumer/component-ops/many-components-writer';
@@ -10,6 +11,7 @@ import { NothingToImport } from '@teambit/legacy/dist/consumer/exceptions';
 import componentIdToPackageName from '@teambit/legacy/dist/utils/bit/component-id-to-package-name';
 import { VariantsMain, Patterns, VariantsAspect } from '@teambit/variants';
 import { Component, ComponentID, ComponentMap } from '@teambit/component';
+import { EnvsMain, EnvsAspect } from '@teambit/envs';
 import { IssuesClasses } from '@teambit/component-issues';
 import {
   WorkspaceDependencyLifecycleType,
@@ -67,7 +69,9 @@ export class InstallMain {
 
     private importer: ImporterMain,
 
-    private compiler: CompilerMain
+    private compiler: CompilerMain,
+
+    private envs: EnvsMain,
   ) {}
   /**
    * Install dependencies for all components in the workspace
@@ -240,9 +244,46 @@ export class InstallMain {
       rootPolicy,
       rootDir: this.workspace.path,
     });
+    // const envs = []
+    const envs = new Set<string>();
+    ; (await this.workspace.list()).forEach((component) => {
+      envs.add(this.envs.getEnvId(component));
+      // debugger;
+    });
+    const workspaceDeps = Object.fromEntries(
+      Object.values(manifests)
+        .filter(({ name }) => name !== 'workspace')
+        .map((manifest) => [manifest.name, `file:../${manifest.name}`])
+    )
+    const envManifests = Object.fromEntries(
+      await Promise.all(
+        Array.from(envs.values()).map(async (envId) => {
+          const env = this.envs.getEnvDefinitionByStringId(envId)
+          const policy = await this.dependencyResolver.getComponentEnvPolicyFromEnvDefinition(env!)
+          const dependencies = {};
+          policy.entries.filter(({ force, value }) => force && value.version !== '-').map((entry) => {
+            dependencies[entry.dependencyId] = entry.value.version;
+          });
+          return [path.join(this.workspace.path, 'node_modules', `.${encodeURIComponent(envId)}`), {
+            dependencies: {
+              ...dependencies,
+              ...workspaceDeps,
+            },
+          }];
+        })
+      )
+    );
+    console.log(envManifests)
+    // debugger
+    // componentDirectoryMap.forEach((componentDir, component) => {
+      // debugger
+    // });
     return {
       componentDirectoryMap,
-      manifests,
+      manifests: {
+        ...manifests,
+        ...envManifests,
+      },
     };
   }
 
@@ -442,6 +483,7 @@ export class InstallMain {
     ImporterAspect,
     CompilerAspect,
     IssuesAspect,
+    EnvsAspect,
   ];
 
   static runtime = MainRuntime;
@@ -456,6 +498,7 @@ export class InstallMain {
     importer,
     compiler,
     issues,
+    envs,
   ]: [
     DependencyResolverMain,
     Workspace,
@@ -465,10 +508,11 @@ export class InstallMain {
     CommunityMain,
     ImporterMain,
     CompilerMain,
-    IssuesMain
+    IssuesMain,
+    EnvsMain
   ]) {
     const logger = loggerExt.createLogger('teambit.bit/install');
-    const installExt = new InstallMain(dependencyResolver, logger, workspace, variants, importer, compiler);
+    const installExt = new InstallMain(dependencyResolver, logger, workspace, variants, importer, compiler, envs);
     ManyComponentsWriter.registerExternalInstaller({
       install: async () => {
         // TODO: think how we should pass this options
